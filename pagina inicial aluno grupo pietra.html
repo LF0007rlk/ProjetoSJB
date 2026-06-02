@@ -1,0 +1,1284 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal do Aluno</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0e1a;
+    --surface: #111827;
+    --surface2: #1a2235;
+    --accent: #4f8ef7;
+    --accent2: #38d9a9;
+    --accent3: #f7c948;
+    --accent4: #f76b8a;
+    --text: #e8edf5;
+    --text2: #8a9bbf;
+    --border: rgba(255,255,255,0.07);
+    --radius: 14px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background grid */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(79,142,247,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(79,142,247,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .glow {
+    position: fixed;
+    width: 600px; height: 600px;
+    border-radius: 50%;
+    filter: blur(120px);
+    opacity: 0.12;
+    pointer-events: none;
+    z-index: 0;
+  }
+  .glow-blue { background: #4f8ef7; top: -200px; left: -200px; }
+  .glow-teal { background: #38d9a9; bottom: -200px; right: -200px; }
+
+  /* Sidebar */
+  .sidebar {
+    position: fixed;
+    left: 0; top: 0; bottom: 0;
+    width: 240px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .logo-icon {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px;
+    margin-bottom: 10px;
+  }
+
+  .logo-text {
+    font-family: 'Syne', sans-serif;
+    font-weight: 800;
+    font-size: 15px;
+    letter-spacing: 0.5px;
+    color: var(--text);
+  }
+
+  .logo-sub {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 2px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .nav {
+    padding: 16px 12px;
+    flex: 1;
+  }
+
+  .nav-label {
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    padding: 0 12px;
+    margin: 8px 0 4px;
+  }
+
+  .nav-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: var(--text2);
+    transition: all 0.2s;
+    margin-bottom: 2px;
+    border: 1px solid transparent;
+    user-select: none;
+  }
+
+  .nav-item:hover {
+    background: var(--surface2);
+    color: var(--text);
+  }
+
+  .nav-item.active {
+    background: rgba(79,142,247,0.12);
+    color: var(--accent);
+    border-color: rgba(79,142,247,0.2);
+    font-weight: 500;
+  }
+
+  .nav-item .icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px;
+    flex-shrink: 0;
+    background: var(--surface2);
+    transition: all 0.2s;
+  }
+
+  .nav-item.active .icon {
+    background: rgba(79,142,247,0.2);
+  }
+
+  .profile-section {
+    padding: 16px 12px;
+    border-top: 1px solid var(--border);
+  }
+
+  .profile-card {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    background: var(--surface2);
+    border-radius: 10px;
+  }
+
+  .avatar {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent4), var(--accent3));
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 13px;
+    color: white;
+    flex-shrink: 0;
+  }
+
+  .profile-info { flex: 1; min-width: 0; }
+  .profile-name { font-size: 13px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .profile-class { font-size: 11px; color: var(--text2); }
+
+  /* Main */
+  .main {
+    margin-left: 240px;
+    padding: 32px 36px;
+    min-height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Page header */
+  .page-header {
+    margin-bottom: 28px;
+  }
+
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 26px;
+    font-weight: 800;
+    color: var(--text);
+    line-height: 1.2;
+  }
+
+  .page-sub {
+    font-size: 14px;
+    color: var(--text2);
+    margin-top: 4px;
+  }
+
+  /* Tabs */
+  .tab-bar {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 12px;
+    padding: 4px;
+    width: fit-content;
+    margin-bottom: 28px;
+    border: 1px solid var(--border);
+  }
+
+  .tab-btn {
+    padding: 8px 20px;
+    border-radius: 8px;
+    border: none;
+    background: none;
+    color: var(--text2);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+
+  .tab-btn:hover { color: var(--text); }
+
+  .tab-btn.active {
+    background: var(--accent);
+    color: white;
+    font-weight: 600;
+  }
+
+  /* Tab content */
+  .tab-content { display: none; }
+  .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat-card::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+
+  .stat-card.blue::after { background: var(--accent); }
+  .stat-card.teal::after { background: var(--accent2); }
+  .stat-card.yellow::after { background: var(--accent3); }
+  .stat-card.pink::after { background: var(--accent4); }
+
+  .stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--text2); margin-bottom: 8px; }
+  .stat-val { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; }
+  .stat-val.blue { color: var(--accent); }
+  .stat-val.teal { color: var(--accent2); }
+  .stat-val.yellow { color: var(--accent3); }
+  .stat-val.pink { color: var(--accent4); }
+  .stat-desc { font-size: 12px; color: var(--text2); margin-top: 4px; }
+
+  /* Table card */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    margin-bottom: 20px;
+  }
+
+  .card-header {
+    padding: 18px 22px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .badge {
+    padding: 3px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-blue { background: rgba(79,142,247,0.15); color: var(--accent); }
+  .badge-teal { background: rgba(56,217,169,0.15); color: var(--accent2); }
+  .badge-yellow { background: rgba(247,201,72,0.15); color: var(--accent3); }
+  .badge-pink { background: rgba(247,107,138,0.15); color: var(--accent4); }
+  .badge-gray { background: rgba(138,155,191,0.12); color: var(--text2); }
+
+  table { width: 100%; border-collapse: collapse; }
+  th {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    color: var(--text2);
+    padding: 12px 22px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+    background: rgba(255,255,255,0.02);
+  }
+  td {
+    padding: 14px 22px;
+    font-size: 13.5px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.02); }
+
+  .subject-dot {
+    display: inline-block;
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    margin-right: 8px;
+    vertical-align: middle;
+  }
+
+  .score-bar-wrap {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .score-bar {
+    flex: 1; height: 5px; background: var(--surface2); border-radius: 99px; overflow: hidden;
+  }
+  .score-fill {
+    height: 100%; border-radius: 99px; transition: width 0.6s ease;
+  }
+
+  /* Olímpiadas cards */
+  .olimp-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 20px;
+  }
+
+  .olimp-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px;
+    cursor: pointer;
+    transition: all 0.25s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .olimp-card:hover {
+    border-color: rgba(79,142,247,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+  }
+
+  .olimp-card .tag-top {
+    position: absolute;
+    top: 0; right: 0;
+    width: 80px; height: 80px;
+    overflow: hidden;
+  }
+
+  .olimp-icon {
+    font-size: 32px;
+    margin-bottom: 14px;
+    display: block;
+  }
+
+  .olimp-name {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .olimp-org {
+    font-size: 12px;
+    color: var(--text2);
+    margin-bottom: 12px;
+  }
+
+  .olimp-meta {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .olimp-deadline {
+    font-size: 11px;
+    color: var(--text2);
+    margin-top: 10px;
+    padding-top: 10px;
+    border-top: 1px solid var(--border);
+  }
+
+  .olimp-deadline span { color: var(--accent3); font-weight: 500; }
+
+  /* Calendar */
+  .calendar-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .cal-header {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .cal-nav {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .cal-nav button {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+  }
+
+  .cal-nav button:hover {
+    background: rgba(79,142,247,0.15);
+    border-color: rgba(79,142,247,0.3);
+    color: var(--accent);
+  }
+
+  .cal-month {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    min-width: 160px;
+    text-align: center;
+  }
+
+  .cal-grid {
+    padding: 20px 24px;
+  }
+
+  .cal-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+
+  .cal-wd {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    color: var(--text2);
+    padding: 6px 0;
+  }
+
+  .cal-days {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 4px;
+  }
+
+  .cal-day {
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border-radius: 10px;
+    font-size: 13px;
+    cursor: pointer;
+    position: relative;
+    transition: all 0.15s;
+    min-height: 52px;
+    gap: 2px;
+  }
+
+  .cal-day:hover:not(.empty):not(.today) {
+    background: var(--surface2);
+  }
+
+  .cal-day.empty { cursor: default; }
+
+  .cal-day.today {
+    background: var(--accent);
+    color: white;
+    font-weight: 700;
+  }
+
+  .cal-day.other-month { color: rgba(255,255,255,0.15); }
+
+  .cal-day.has-event .day-dots {
+    display: flex;
+    gap: 2px;
+    position: absolute;
+    bottom: 4px;
+  }
+
+  .day-dot {
+    width: 4px; height: 4px;
+    border-radius: 50%;
+  }
+
+  .cal-day.today .day-dots .day-dot { background: white; }
+
+  .cal-day .day-num { font-size: 13px; font-weight: 500; }
+
+  /* Schedule legend */
+  .schedule-section {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 16px;
+  }
+
+  .time-table {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+  }
+
+  .tt-row {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .tt-row:last-child { border-bottom: none; }
+
+  .tt-time {
+    padding: 14px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text2);
+    border-right: 1px solid var(--border);
+    background: rgba(255,255,255,0.01);
+    display: flex;
+    align-items: center;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .tt-class {
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .tt-dot {
+    width: 10px; height: 10px;
+    border-radius: 3px;
+    flex-shrink: 0;
+  }
+
+  .tt-info {}
+  .tt-subject { font-size: 13px; font-weight: 500; color: var(--text); }
+  .tt-teacher { font-size: 11px; color: var(--text2); margin-top: 1px; }
+
+  .tt-break {
+    background: rgba(255,255,255,0.02);
+    display: flex; align-items: center;
+    padding: 8px 16px;
+    font-size: 12px;
+    color: var(--text2);
+    font-style: italic;
+    grid-column: 1 / -1;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* Event sidebar */
+  .events-sidebar {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .event-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    border-left: 3px solid;
+    transition: all 0.2s;
+    cursor: pointer;
+  }
+
+  .event-item:hover { transform: translateX(2px); }
+  .event-item.ev-blue { border-left-color: var(--accent); }
+  .event-item.ev-teal { border-left-color: var(--accent2); }
+  .event-item.ev-yellow { border-left-color: var(--accent3); }
+  .event-item.ev-pink { border-left-color: var(--accent4); }
+
+  .ev-date { font-size: 11px; color: var(--text2); margin-bottom: 3px; }
+  .ev-title { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 3px; }
+  .ev-desc { font-size: 11px; color: var(--text2); }
+
+  /* Section title */
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 12px;
+  }
+
+  /* Tooltip */
+  .tooltip-wrap { position: relative; display: inline-block; }
+  .tooltip-wrap:hover .tooltip { opacity: 1; pointer-events: auto; }
+  .tooltip {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: #1e2c45;
+    color: var(--text);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 6px;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+    border: 1px solid var(--border);
+    z-index: 9;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--surface2); border-radius: 4px; }
+</style>
+</head>
+<body>
+
+<div class="glow glow-blue"></div>
+<div class="glow glow-teal"></div>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="logo">
+    <div class="logo-icon">🎓</div>
+    <div class="logo-text">EduPortal</div>
+    <div class="logo-sub">Ensino Médio Integral</div>
+  </div>
+
+  <nav class="nav">
+    <div class="nav-label">Principal</div>
+    <div class="nav-item" onclick="setNav(this,'dashboard')">
+      <div class="icon">🏠</div> Dashboard
+    </div>
+    <div class="nav-item active" onclick="setNav(this,'aluno')">
+      <div class="icon">👤</div> Área do Aluno
+    </div>
+
+    <div class="nav-label" style="margin-top:16px">Acadêmico</div>
+    <div class="nav-item" onclick="setNav(this,'notas')">
+      <div class="icon">📊</div> Notas e Boletim
+    </div>
+    <div class="nav-item" onclick="setNav(this,'frequencia')">
+      <div class="icon">📋</div> Frequência
+    </div>
+    <div class="nav-item" onclick="setNav(this,'materiais')">
+      <div class="icon">📚</div> Materiais
+    </div>
+    <div class="nav-item" onclick="setNav(this,'comunicados')">
+      <div class="icon">📢</div> Comunicados
+    </div>
+  </nav>
+
+  <div class="profile-section">
+    <div class="profile-card">
+      <div class="avatar">JS</div>
+      <div class="profile-info">
+        <div class="profile-name">João Silva</div>
+        <div class="profile-class">3º Ano A · 2025</div>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<!-- Main content -->
+<main class="main">
+
+  <div class="page-header">
+    <div class="page-title">Área do Aluno</div>
+    <div class="page-sub">Bem-vindo de volta, João! Aqui está seu painel acadêmico.</div>
+  </div>
+
+  <!-- Tab bar -->
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="switchTab('provas', this)"> Provas</button>
+    <button class="tab-btn" onclick="switchTab('olimpiadas', this)"> Olimpíadas</button>
+    <button class="tab-btn" onclick="switchTab('calendario', this)"> Calendário</button>
+  </div>
+
+  <!-- ======================== TAB PROVAS ======================== -->
+  <div id="tab-provas" class="tab-content active">
+
+    <div class="stats-row">
+      <div class="stat-card blue">
+        <div class="stat-label">Próximas Provas</div>
+        <div class="stat-val blue">4</div>
+        <div class="stat-desc">Nos próximos 30 dias</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-label">Média Geral</div>
+        <div class="stat-val teal">7.8</div>
+        <div class="stat-desc">+0.3 vs bimestre ant.</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Provas Realizadas</div>
+        <div class="stat-val yellow">18</div>
+        <div class="stat-desc">Neste ano letivo</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-label">Recuperações</div>
+        <div class="stat-val pink">2</div>
+        <div class="stat-desc">Pendentes este bim.</div>
+      </div>
+    </div>
+
+    <!-- Próximas provas -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Próximas Provas</div>
+        <span class="badge badge-blue">4 agendadas</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Disciplina</th>
+            <th>Tipo</th>
+            <th>Data</th>
+            <th>Horário</th>
+            <th>Conteúdo</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="subject-dot" style="background:#4f8ef7"></span>Matemática</td>
+            <td><span class="badge badge-blue">Bimestral</span></td>
+            <td>12/06/2025</td>
+            <td>07:30 – 09:00</td>
+            <td>Funções e Trigonometria</td>
+            <td><span class="badge badge-yellow">Em 11 dias</span></td>
+          </tr>
+          <tr>
+            <td><span class="subject-dot" style="background:#38d9a9"></span>Português</td>
+            <td><span class="badge badge-teal">Redação</span></td>
+            <td>14/06/2025</td>
+            <td>09:10 – 10:40</td>
+            <td>Dissertação Argumentativa</td>
+            <td><span class="badge badge-yellow">Em 13 dias</span></td>
+          </tr>
+          <tr>
+            <td><span class="subject-dot" style="background:#f7c948"></span>Física</td>
+            <td><span class="badge badge-blue">Bimestral</span></td>
+            <td>17/06/2025</td>
+            <td>07:30 – 09:00</td>
+            <td>Óptica e Ondulatória</td>
+            <td><span class="badge badge-yellow">Em 16 dias</span></td>
+          </tr>
+          <tr>
+            <td><span class="subject-dot" style="background:#f76b8a"></span>História</td>
+            <td><span class="badge badge-pink">Bimestral</span></td>
+            <td>19/06/2025</td>
+            <td>10:50 – 12:20</td>
+            <td>Guerra Fria e Globalização</td>
+            <td><span class="badge badge-yellow">Em 18 dias</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Notas recentes -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Desempenho por Disciplina — 3º Bimestre</div>
+        <span class="badge badge-gray">Atualizado hoje</span>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Disciplina</th>
+            <th>Nota</th>
+            <th>Média da Turma</th>
+            <th>Desempenho</th>
+            <th>Situação</th>
+          </tr>
+        </thead>
+        <tbody id="grades-body"></tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ======================== TAB OLIMPÍADAS ======================== -->
+  <div id="tab-olimpiadas" class="tab-content">
+
+    <div class="stats-row">
+      <div class="stat-card blue">
+        <div class="stat-label">Inscrições Ativas</div>
+        <div class="stat-val blue">3</div>
+        <div class="stat-desc">Neste semestre</div>
+      </div>
+      <div class="stat-card yellow">
+        <div class="stat-label">Medalhas</div>
+        <div class="stat-val yellow">2</div>
+        <div class="stat-desc">Bronze + Menção Honrosa</div>
+      </div>
+      <div class="stat-card teal">
+        <div class="stat-label">Pontos Acumulados</div>
+        <div class="stat-val teal">145</div>
+        <div class="stat-desc">Ranking escolar</div>
+      </div>
+      <div class="stat-card pink">
+        <div class="stat-label">Próxima Fase</div>
+        <div class="stat-val pink">OBMEP</div>
+        <div class="stat-desc">Fase 2 em 28/06</div>
+      </div>
+    </div>
+
+    <div class="section-title">Olimpíadas Disponíveis</div>
+    <div class="olimp-grid" id="olimp-grid"></div>
+
+    <!-- Histórico -->
+    <div class="card">
+      <div class="card-header">
+        <div class="card-title">Histórico de Participações</div>
+      </div>
+      <table>
+        <thead>
+          <tr>
+            <th>Olimpíada</th>
+            <th>Ano</th>
+            <th>Fase</th>
+            <th>Resultado</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>OBMEP</td>
+            <td>2024</td>
+            <td>Fase 1</td>
+            <td><span class="badge badge-yellow">🥉 Bronze</span></td>
+          </tr>
+          <tr>
+            <td>OBA</td>
+            <td>2024</td>
+            <td>Nível 3</td>
+            <td><span class="badge badge-teal">⭐ Menção Honrosa</span></td>
+          </tr>
+          <tr>
+            <td>ONEM</td>
+            <td>2023</td>
+            <td>Fase 1</td>
+            <td><span class="badge badge-gray">Participante</span></td>
+          </tr>
+          <tr>
+            <td>OBFEP</td>
+            <td>2023</td>
+            <td>Fase 1</td>
+            <td><span class="badge badge-gray">Participante</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- ======================== TAB CALENDÁRIO ======================== -->
+  <div id="tab-calendario" class="tab-content">
+
+    <!-- Calendar + events -->
+    <div style="display:grid; grid-template-columns: 1fr 280px; gap:20px; margin-bottom: 24px;">
+
+      <div class="calendar-wrap">
+        <div class="cal-header">
+          <div class="cal-title" style="font-family:'Syne',sans-serif;font-size:14px;font-weight:700;color:var(--text2)">Calendário Escolar</div>
+          <div class="cal-nav">
+            <button onclick="changeMonth(-1)">‹</button>
+            <div class="cal-month" id="cal-month-label"></div>
+            <button onclick="changeMonth(1)">›</button>
+          </div>
+        </div>
+        <div class="cal-grid">
+          <div class="cal-weekdays">
+            <div class="cal-wd">Dom</div>
+            <div class="cal-wd">Seg</div>
+            <div class="cal-wd">Ter</div>
+            <div class="cal-wd">Qua</div>
+            <div class="cal-wd">Qui</div>
+            <div class="cal-wd">Sex</div>
+            <div class="cal-wd">Sáb</div>
+          </div>
+          <div class="cal-days" id="cal-days"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="section-title" style="margin-bottom:10px">Próximos Eventos</div>
+        <div class="events-sidebar" id="events-list"></div>
+      </div>
+    </div>
+
+    <!-- Grade horária -->
+    <div class="section-title">Grade Horária — Ensino Médio Integral (3º Ano A)</div>
+    <div class="schedule-section">
+      <div>
+        <!-- Days tabs -->
+        <div style="display:flex; gap:4px; margin-bottom:12px; overflow-x:auto; padding-bottom:4px;">
+          <button class="tab-btn active" id="day-btn-0" onclick="setDay(0,this)" style="background:var(--accent);color:white;">Segunda</button>
+          <button class="tab-btn" id="day-btn-1" onclick="setDay(1,this)">Terça</button>
+          <button class="tab-btn" id="day-btn-2" onclick="setDay(2,this)">Quarta</button>
+          <button class="tab-btn" id="day-btn-3" onclick="setDay(3,this)">Quinta</button>
+          <button class="tab-btn" id="day-btn-4" onclick="setDay(4,this)">Sexta</button>
+        </div>
+        <div class="time-table" id="schedule-table"></div>
+      </div>
+
+      <div>
+        <div class="section-title">Legenda de Cores</div>
+        <div style="display:flex; flex-direction:column; gap:8px;" id="legend"></div>
+      </div>
+    </div>
+
+  </div>
+
+</main>
+
+<script>
+// ========== NAV ==========
+function setNav(el, page) {
+  document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ========== TABS ==========
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+
+// ========== GRADES ==========
+const subjects = [
+  { name: 'Matemática', color: '#4f8ef7', grade: 8.5, avg: 6.9 },
+  { name: 'Português', color: '#38d9a9', grade: 7.2, avg: 7.1 },
+  { name: 'Física', color: '#f7c948', grade: 6.8, avg: 6.2 },
+  { name: 'Química', color: '#f76b8a', grade: 7.5, avg: 6.5 },
+  { name: 'Biologia', color: '#a78bfa', grade: 8.0, avg: 7.3 },
+  { name: 'História', color: '#fb923c', grade: 9.0, avg: 7.8 },
+  { name: 'Geografia', color: '#34d399', grade: 7.8, avg: 7.0 },
+  { name: 'Inglês', color: '#60a5fa', grade: 8.2, avg: 6.8 },
+];
+
+const gradesBody = document.getElementById('grades-body');
+subjects.forEach(s => {
+  const pct = (s.grade / 10) * 100;
+  const status = s.grade >= 7 ? '<span class="badge badge-teal">Aprovado</span>' : '<span class="badge badge-pink">Recuperação</span>';
+  const diff = (s.grade - s.avg).toFixed(1);
+  const diffColor = diff >= 0 ? '#38d9a9' : '#f76b8a';
+  gradesBody.innerHTML += `
+    <tr>
+      <td><span class="subject-dot" style="background:${s.color}"></span>${s.name}</td>
+      <td><strong style="font-size:15px;color:${s.color}">${s.grade.toFixed(1)}</strong></td>
+      <td>${s.avg.toFixed(1)} <span style="font-size:11px;color:${diffColor}">(${diff >= 0 ? '+' : ''}${diff})</span></td>
+      <td>
+        <div class="score-bar-wrap">
+          <div class="score-bar"><div class="score-fill" style="width:${pct}%;background:${s.color}"></div></div>
+          <span style="font-size:12px;color:var(--text2);min-width:28px">${pct.toFixed(0)}%</span>
+        </div>
+      </td>
+      <td>${status}</td>
+    </tr>`;
+});
+
+// ========== OLIMPÍADAS ==========
+const olimpiadas = [
+  { icon: '', name: 'OBMEP', org: 'Olimpíada Brasileira de Matemática das Escolas Públicas', area: 'Matemática', level: 'Nacional', deadline: '28/06/2025', status: 'Inscrito', color: 'badge-blue' },
+  { icon: '', name: 'OBA', org: 'Olimpíada Brasileira de Astronomia', area: 'Ciências', level: 'Nacional', deadline: '15/07/2025', status: 'Disponível', color: 'badge-gray' },
+  { icon: '', name: 'OBQ', org: 'Olimpíada Brasileira de Química', area: 'Química', level: 'Nacional', deadline: '10/07/2025', status: 'Inscrito', color: 'badge-blue' },
+  { icon: '', name: 'OBB', org: 'Olimpíada Brasileira de Biologia', area: 'Biologia', level: 'Nacional', deadline: '20/07/2025', status: 'Disponível', color: 'badge-gray' },
+  { icon: '', name: 'OBI', org: 'Olimpíada Brasileira de Informática', area: 'Tecnologia', level: 'Nacional', deadline: '05/07/2025', status: 'Inscrito', color: 'badge-blue' },
+  { icon: '', name: 'OFLP', org: 'Olimpíada de Filosofia e Língua Portuguesa', area: 'Humanas', level: 'Estadual', deadline: '30/06/2025', status: 'Disponível', color: 'badge-gray' },
+];
+
+const olimpGrid = document.getElementById('olimp-grid');
+olimpiadas.forEach(o => {
+  olimpGrid.innerHTML += `
+    <div class="olimp-card">
+      <span class="olimp-icon">${o.icon}</span>
+      <div class="olimp-name">${o.name}</div>
+      <div class="olimp-org">${o.org}</div>
+      <div class="olimp-meta">
+        <span class="badge badge-teal">${o.area}</span>
+        <span class="badge badge-gray">${o.level}</span>
+        <span class="badge ${o.color}">${o.status}</span>
+      </div>
+      <div class="olimp-deadline">Inscrições até: <span>${o.deadline}</span></div>
+    </div>`;
+});
+
+// ========== CALENDAR ==========
+let calYear = 2025, calMonth = 5;
+
+const events = [
+  { date: '2025-06-12', title: 'Prova Bimestral Matemática', type: 'ev-blue' },
+  { date: '2025-06-14', title: 'Redação — Português', type: 'ev-teal' },
+  { date: '2025-06-17', title: 'Prova Bimestral Física', type: 'ev-yellow' },
+  { date: '2025-06-19', title: 'Prova Bimestral História', type: 'ev-pink' },
+  { date: '2025-06-20', title: 'Recesso Escolar', type: 'ev-teal' },
+  { date: '2025-06-24', title: 'São João — Festividade', type: 'ev-yellow' },
+  { date: '2025-06-28', title: 'OBMEP Fase 2', type: 'ev-blue' },
+  { date: '2025-07-05', title: 'OBI — Fase 1', type: 'ev-blue' },
+  { date: '2025-07-10', title: 'Conselho de Classe', type: 'ev-pink' },
+  { date: '2025-07-14', title: 'Início das Férias', type: 'ev-teal' },
+];
+
+const monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+
+function renderCalendar() {
+  const label = document.getElementById('cal-month-label');
+  label.textContent = `${monthNames[calMonth]} ${calYear}`;
+  const container = document.getElementById('cal-days');
+  container.innerHTML = '';
+  const first = new Date(calYear, calMonth, 1).getDay();
+  const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+  const today = new Date();
+
+  for (let i = 0; i < first; i++) {
+    const d = document.createElement('div');
+    d.className = 'cal-day empty';
+    container.appendChild(d);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dateStr = `${calYear}-${String(calMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+    const dayEvents = events.filter(e => e.date === dateStr);
+    const isToday = today.getDate() === d && today.getMonth() === calMonth && today.getFullYear() === calYear;
+    const el = document.createElement('div');
+    el.className = 'cal-day' + (isToday ? ' today' : '') + (dayEvents.length ? ' has-event' : '');
+    const title = dayEvents.map(e => e.title).join('\n');
+    if (title) el.title = title;
+    el.innerHTML = `<span class="day-num">${d}</span>`;
+    if (dayEvents.length) {
+      const dots = document.createElement('div');
+      dots.className = 'day-dots';
+      dayEvents.slice(0,3).forEach(ev => {
+        const dot = document.createElement('div');
+        dot.className = 'day-dot';
+        const colors = {'ev-blue':'#4f8ef7','ev-teal':'#38d9a9','ev-yellow':'#f7c948','ev-pink':'#f76b8a'};
+        dot.style.background = isToday ? 'white' : (colors[ev.type] || '#8a9bbf');
+        dots.appendChild(dot);
+      });
+      el.appendChild(dots);
+    }
+    container.appendChild(el);
+  }
+  renderEvents();
+}
+
+function changeMonth(dir) {
+  calMonth += dir;
+  if (calMonth > 11) { calMonth = 0; calYear++; }
+  if (calMonth < 0) { calMonth = 11; calYear--; }
+  renderCalendar();
+}
+
+function renderEvents() {
+  const list = document.getElementById('events-list');
+  list.innerHTML = '';
+  const upcoming = events.filter(e => new Date(e.date) >= new Date()).slice(0, 5);
+  upcoming.forEach(ev => {
+    const d = new Date(ev.date);
+    const formatted = d.toLocaleDateString('pt-BR', { day: '2-digit', month: 'long' });
+    list.innerHTML += `
+      <div class="event-item ${ev.type}">
+        <div class="ev-date">${formatted}</div>
+        <div class="ev-title">${ev.title}</div>
+      </div>`;
+  });
+}
+
+// ========== SCHEDULE ==========
+const subjectColors = {
+  'Matemática': '#4f8ef7',
+  'Português': '#38d9a9',
+  'Física': '#f7c948',
+  'Química': '#f76b8a',
+  'Biologia': '#a78bfa',
+  'História': '#fb923c',
+  'Geografia': '#34d399',
+  'Inglês': '#60a5fa',
+  'Educação Física': '#f87171',
+  'Arte': '#e879f9',
+  'Filosofia': '#fbbf24',
+  'Sociologia': '#a3e635',
+};
+
+const schedule = [
+  // Segunda
+  [
+    { time: '07:00 – 07:50', subject: 'Matemática', teacher: 'Prof. Carlos Mendes' },
+    { time: '07:50 – 08:40', subject: 'Matemática', teacher: 'Prof. Carlos Mendes' },
+    { break: true, label: '☕ Intervalo — 08:40 às 09:00' },
+    { time: '09:00 – 09:50', subject: 'Português', teacher: 'Profa. Ana Lima' },
+    { time: '09:50 – 10:40', subject: 'Física', teacher: 'Prof. Roberto Castro' },
+    { break: true, label: '🍽 Almoço — 10:40 às 12:00' },
+    { time: '12:00 – 12:50', subject: 'História', teacher: 'Profa. Mariana Fonseca' },
+    { time: '12:50 – 13:40', subject: 'Inglês', teacher: 'Profa. Patricia Wells' },
+    { break: true, label: '☕ Intervalo — 13:40 às 14:00' },
+    { time: '14:00 – 14:50', subject: 'Educação Física', teacher: 'Prof. André Santos' },
+    { time: '14:50 – 15:40', subject: 'Arte', teacher: 'Profa. Camila Rocha' },
+  ],
+  // Terça
+  [
+    { time: '07:00 – 07:50', subject: 'Química', teacher: 'Profa. Fernanda Alves' },
+    { time: '07:50 – 08:40', subject: 'Química', teacher: 'Profa. Fernanda Alves' },
+    { break: true, label: '☕ Intervalo — 08:40 às 09:00' },
+    { time: '09:00 – 09:50', subject: 'Matemática', teacher: 'Prof. Carlos Mendes' },
+    { time: '09:50 – 10:40', subject: 'Biologia', teacher: 'Profa. Luciana Torres' },
+    { break: true, label: '🍽 Almoço — 10:40 às 12:00' },
+    { time: '12:00 – 12:50', subject: 'Português', teacher: 'Profa. Ana Lima' },
+    { time: '12:50 – 13:40', subject: 'Filosofia', teacher: 'Prof. Henrique Neves' },
+    { break: true, label: '☕ Intervalo — 13:40 às 14:00' },
+    { time: '14:00 – 14:50', subject: 'Sociologia', teacher: 'Profa. Beatriz Moura' },
+    { time: '14:50 – 15:40', subject: 'Inglês', teacher: 'Profa. Patricia Wells' },
+  ],
+  // Quarta
+  [
+    { time: '07:00 – 07:50', subject: 'Física', teacher: 'Prof. Roberto Castro' },
+    { time: '07:50 – 08:40', subject: 'Física', teacher: 'Prof. Roberto Castro' },
+    { break: true, label: '☕ Intervalo — 08:40 às 09:00' },
+    { time: '09:00 – 09:50', subject: 'História', teacher: 'Profa. Mariana Fonseca' },
+    { time: '09:50 – 10:40', subject: 'Geografia', teacher: 'Prof. Diego Pereira' },
+    { break: true, label: '🍽 Almoço — 10:40 às 12:00' },
+    { time: '12:00 – 12:50', subject: 'Matemática', teacher: 'Prof. Carlos Mendes' },
+    { time: '12:50 – 13:40', subject: 'Biologia', teacher: 'Profa. Luciana Torres' },
+    { break: true, label: '☕ Intervalo — 13:40 às 14:00' },
+    { time: '14:00 – 14:50', subject: 'Arte', teacher: 'Profa. Camila Rocha' },
+    { time: '14:50 – 15:40', subject: 'Educação Física', teacher: 'Prof. André Santos' },
+  ],
+  // Quinta
+  [
+    { time: '07:00 – 07:50', subject: 'Biologia', teacher: 'Profa. Luciana Torres' },
+    { time: '07:50 – 08:40', subject: 'Química', teacher: 'Profa. Fernanda Alves' },
+    { break: true, label: '☕ Intervalo — 08:40 às 09:00' },
+    { time: '09:00 – 09:50', subject: 'Português', teacher: 'Profa. Ana Lima' },
+    { time: '09:50 – 10:40', subject: 'Português', teacher: 'Profa. Ana Lima' },
+    { break: true, label: '🍽 Almoço — 10:40 às 12:00' },
+    { time: '12:00 – 12:50', subject: 'Geografia', teacher: 'Prof. Diego Pereira' },
+    { time: '12:50 – 13:40', subject: 'Matemática', teacher: 'Prof. Carlos Mendes' },
+    { break: true, label: '☕ Intervalo — 13:40 às 14:00' },
+    { time: '14:00 – 14:50', subject: 'Inglês', teacher: 'Profa. Patricia Wells' },
+    { time: '14:50 – 15:40', subject: 'Filosofia', teacher: 'Prof. Henrique Neves' },
+  ],
+  // Sexta
+  [
+    { time: '07:00 – 07:50', subject: 'História', teacher: 'Profa. Mariana Fonseca' },
+    { time: '07:50 – 08:40', subject: 'Geografia', teacher: 'Prof. Diego Pereira' },
+    { break: true, label: '☕ Intervalo — 08:40 às 09:00' },
+    { time: '09:00 – 09:50', subject: 'Física', teacher: 'Prof. Roberto Castro' },
+    { time: '09:50 – 10:40', subject: 'Química', teacher: 'Profa. Fernanda Alves' },
+    { break: true, label: '🍽 Almoço — 10:40 às 12:00' },
+    { time: '12:00 – 12:50', subject: 'Sociologia', teacher: 'Profa. Beatriz Moura' },
+    { time: '12:50 – 13:40', subject: 'Matemática', teacher: 'Prof. Carlos Mendes' },
+    { break: true, label: '☕ Intervalo — 13:40 às 14:00' },
+    { time: '14:00 – 14:50', subject: 'Educação Física', teacher: 'Prof. André Santos' },
+    { time: '14:50 – 15:40', subject: 'Português', teacher: 'Profa. Ana Lima' },
+  ],
+];
+
+let currentDay = 0;
+
+function setDay(idx, btn) {
+  currentDay = idx;
+  document.querySelectorAll('[id^="day-btn-"]').forEach(b => {
+    b.classList.remove('active');
+    b.style.background = '';
+    b.style.color = '';
+  });
+  btn.classList.add('active');
+  btn.style.background = 'var(--accent)';
+  btn.style.color = 'white';
+  renderSchedule();
+}
+
+function renderSchedule() {
+  const table = document.getElementById('schedule-table');
+  table.innerHTML = '';
+  schedule[currentDay].forEach(slot => {
+    if (slot.break) {
+      table.innerHTML += `<div class="tt-break">${slot.label}</div>`;
+    } else {
+      const color = subjectColors[slot.subject] || '#8a9bbf';
+      table.innerHTML += `
+        <div class="tt-row">
+          <div class="tt-time">${slot.time}</div>
+          <div class="tt-class">
+            <div class="tt-dot" style="background:${color}"></div>
+            <div class="tt-info">
+              <div class="tt-subject">${slot.subject}</div>
+              <div class="tt-teacher">${slot.teacher}</div>
+            </div>
+          </div>
+        </div>`;
+    }
+  });
+}
+
+function renderLegend() {
+  const leg = document.getElementById('legend');
+  Object.entries(subjectColors).forEach(([sub, color]) => {
+    leg.innerHTML += `
+      <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--surface);border:1px solid var(--border);border-radius:8px;">
+        <div style="width:12px;height:12px;border-radius:3px;flex-shrink:0;background:${color}"></div>
+        <span style="font-size:13px;color:var(--text)">${sub}</span>
+      </div>`;
+  });
+}
+
+// Init
+renderCalendar();
+renderSchedule();
+renderLegend();
+</script>
+</body>
+</html>
